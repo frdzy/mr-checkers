@@ -1,0 +1,12 @@
+.checkersCell {
+  height: 50px;
+  width: 50px;
+}
+
+.checkersCell.odd {
+  background: #bbb;
+}
+
+.checkersCell.even {
+  background: #555;
+}

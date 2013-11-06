@@ -1,0 +1,4 @@
+[submodule "packages/react"]
+  path = packages/react
+  url = https://github.com/benjamn/meteor-react.git
+  ignore = dirty
