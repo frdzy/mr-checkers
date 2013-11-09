@@ -1,9 +1,19 @@
 /**
  * @jsx React.DOM
  */
-var CheckersColors = {
-  BLACK: 0,
-  WHITE: 1
+var CheckersPlayers = {
+  P1: 0,
+  P2: 1
+};
+
+var CheckersColors = {};
+CheckersColors[CheckersPlayers.P1] = {
+  fill: '#f00',
+  border: '#000'
+};
+CheckersColors[CheckersPlayers.P2] = {
+  fill: '#000',
+  border: '#fff'
 };
 
 var CheckersLevels = {
@@ -11,50 +21,55 @@ var CheckersLevels = {
   KING: 1
 };
 
+function getInitialBoardPieces() {
+  var playerOnePositions = [
+    [0, 0],
+    [0, 2],
+    [0, 4],
+    [0, 6],
+    [1, 1],
+    [1, 3],
+    [1, 5],
+    [1, 7],
+    [2, 0],
+    [2, 2],
+    [2, 4],
+    [2, 6]
+  ];
+  var playerTwoPositions = [
+    [5, 1],
+    [5, 3],
+    [5, 5],
+    [5, 7],
+    [6, 0],
+    [6, 2],
+    [6, 4],
+    [6, 6],
+    [7, 1],
+    [7, 3],
+    [7, 5],
+    [7, 7]
+  ];
+  var pieces = {};
+  function add(player, piece) {
+    var r = piece[0];
+    var c = piece[1];
+    var curRow = pieces[r] || (pieces[r] = {});
+    curRow[c] = {
+      player: player,
+      level: CheckersLevels.MAN
+    };
+  }
+  playerOnePositions.forEach(add.bind(null, CheckersPlayers.P1));
+  playerTwoPositions.forEach(add.bind(null, CheckersPlayers.P2));
+
+  return pieces;
+}
+
 var CheckersStage = React.createClass({
   getInitialState: function() {
-    var blacks = [
-      [0, 0],
-      [0, 2],
-      [0, 4],
-      [0, 6],
-      [1, 1],
-      [1, 3],
-      [1, 5],
-      [1, 7],
-      [2, 0],
-      [2, 2],
-      [2, 4],
-      [2, 6]
-    ];
-    var whites = [
-      [5, 1],
-      [5, 3],
-      [5, 5],
-      [5, 7],
-      [6, 0],
-      [6, 2],
-      [6, 4],
-      [6, 6],
-      [7, 1],
-      [7, 3],
-      [7, 5],
-      [7, 7]
-    ];
-    var pieces = {};
-    function add(color, piece) {
-      var r = piece[0];
-      var c = piece[1];
-      var curRow = pieces[r] || (pieces[r] = {});
-      curRow[c] = {
-        color: color,
-        level: CheckersLevels.MAN
-      };
-    }
-    blacks.forEach(add.bind(null, CheckersColors.BLACK));
-    whites.forEach(add.bind(null, CheckersColors.WHITE));
     return {
-      pieces: pieces
+      pieces: getInitialBoardPieces()
     };
   },
 
@@ -80,7 +95,7 @@ var CheckersBoard = React.createClass({
       if (pieceData = row[c]) {
         return (
           <CheckersPiece
-            color={pieceData.color}
+            player={pieceData.player}
             level={pieceData.level}
           />
         );
@@ -148,12 +163,76 @@ var CheckersCell = React.createClass({
 });
 
 var CheckersPiece = React.createClass({
+  getBorderColorCode: function() {
+    var checkersPlayer = this.props.player;
+    return CheckersColors[checkersPlayer].border;
+  },
+
+  getFillColorCode: function() {
+    var checkersPlayer = this.props.player;
+    return CheckersColors[checkersPlayer].fill;
+  },
+
+  getDesign: function() {
+    var checkersLevel = this.props.level;
+    switch (checkersLevel) {
+      case CheckersLevels.MAN:
+        return null;
+      case CheckersLevels.KING:
+        return [
+          <line
+            x1="20"
+            y1="30"
+            x2="15"
+            y2="19"
+            stroke={this.getBorderColorCode()}
+            stroke-width="1"
+          />,
+          <line
+            x1="25"
+            y1="30"
+            x2="25"
+            y2="15"
+            stroke={this.getBorderColorCode()}
+            stroke-width="1"
+          />,
+          <line
+            x1="30"
+            y1="30"
+            x2="35"
+            y2="19"
+            stroke={this.getBorderColorCode()}
+            stroke-width="1"
+          />
+        ];
+    }
+    console.error('Invalid level ' + checkersLevel);
+    return null;
+  },
+
   render: function() {
+    var colorCode = this.getFillColorCode();
     return (
-      <div>
-        {this.props.color}
-        <br />
-        {this.props.level}
+      <div className="checkersPiece">
+        <svg>
+          <circle
+            cx="25"
+            cy="25"
+            stroke={this.getBorderColorCode()}
+            stroke-width="1"
+            r="25"
+            fill={colorCode}
+          />
+          <circle
+            cx="25"
+            cy="25"
+            stroke={this.getBorderColorCode()}
+            stroke-width="1"
+            r="20"
+            fill={this.getFillColorCode()}
+          />
+          {this.getDesign()}
+        </svg>
       </div>
     );
   }

@@ -3,6 +3,11 @@
   width: 50px;
 }
 
+.checkersPiece {
+  height: 50px;
+  width: 50px;
+}
+
 .checkersCell.odd {
   background: #bbb;
 }
