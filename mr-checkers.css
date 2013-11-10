@@ -1,3 +1,21 @@
+.checkersApp {
+  margin-left: auto;
+  margin-right: auto;
+  width: 800px;
+}
+
+.checkersStage {
+  float: left;
+}
+
+.checkersGamesPanel {
+  float: right;
+}
+
+ul.checkersGamesList {
+  list-style-type: square;
+}
+
 .checkersCell {
   height: 50px;
   width: 50px;
@@ -14,4 +32,22 @@
 
 .checkersCell.even {
   background: #555;
+}
+
+.checkersBoard {
+  position: relative;
+  vertical-align: middle;
+  margin: 10px auto;
+}
+
+.checkersLoading {
+  background-color: #fff;
+  height: 50px;
+  font: 24px/50px Helvetica, sans-serif;
+  left: 50%;
+  margin: -25px 0 0 -20%;
+  position: absolute;
+  text-align: center;
+  top: 50%;
+  width: 40%;
 }
