@@ -25,21 +25,29 @@ var CheckersApp = React.createClass({
 
   mixins: [MeteorMixin],
 
-  getMeteorState: function() {
-    var games = CheckersGames.find().fetch();
-    var curGameID = Session.get('current_game_id');
+  getCurrentGameID: function() {
+    return Session.get('current_game_id');
+  },
+
+  getCurrentGame: function() {
+    var curGameID = this.getCurrentGameID();
     var curGame = null;
     if (curGameID) {
-      games.forEach(function(game) {
-        if (game._id === curGameID) {
-          curGame = game;
-          return false;
-        }
+      curGame = CheckersGames.findOne({
+        _id: curGameID
       });
     }
+    return curGame;
+  },
 
+  getAllGames: function() {
+    return CheckersGames.find().fetch();
+  },
+
+  getMeteorState: function() {
+    var curGame = this.getCurrentGame();
     return {
-      currentGameID: curGameID,
+      currentGameID: this.getCurrentGameID(),
       currentGame: _.extend(
         {
           height: 8,
@@ -48,12 +56,28 @@ var CheckersApp = React.createClass({
         },
         curGame
       ),
-      games: games
+      games: this.getAllGames()
     };
   },
 
   onSelectGame: function(gameID) {
     Session.set('current_game_id', gameID);
+  },
+
+  onPieceSelect: function(piece) {
+    var currentGameID = this.getCurrentGameID();
+    CheckersGames.update(
+      currentGameID,
+      {$set: {selected: piece}}
+    );
+  },
+
+  onPieceUnselect: function() {
+    var currentGameID = this.getCurrentGameID();
+    CheckersGames.update(
+      currentGameID,
+      {$set: {selected: null}}
+    );
   },
 
   render: function() {
@@ -65,7 +89,9 @@ var CheckersApp = React.createClass({
           games={this.state.games}
         />
         <CheckersStage
-          gameData={this.state.currentGame}
+          data={this.state.currentGame}
+          onPieceSelect={this.onPieceSelect}
+          onPieceUnselect={this.onPieceUnselect}
         />
       </div>
     );
@@ -135,9 +161,7 @@ var CheckersStage = React.createClass({
   render: function() {
     return (
       <div className="checkersStage">
-        <CheckersBoard
-          data={this.props.gameData}
-        />
+        {this.transferPropsTo(<CheckersBoard />)}
       </div>
     );
   }
@@ -148,13 +172,21 @@ var CheckersBoard = React.createClass({
   getPieceAtLocation: function(r, c) {
     var row, pieceData;
     var pieces = this.props.data.pieces;
+    var selected = this.props.data.selected;
     if (!pieces) {
       return null;
     }
     if (row = pieces[r]) {
       if (pieceData = row[c]) {
+        var isSelected =
+          selected &&
+          (selected.y === r && selected.x === c);
         return (
           <CheckersPiece
+            position={{y: r, x: c}}
+            onSelect={this.props.onPieceSelect}
+            onUnselect={this.props.onPieceUnselect}
+            isSelected={isSelected}
             player={pieceData.player}
             level={pieceData.level}
           />
@@ -311,10 +343,21 @@ var CheckersPiece = React.createClass({
     return null;
   },
 
+  onSelect: function(evt) {
+    if (this.props.isSelected) {
+      this.props.onUnselect(this.props.position);
+    } else {
+      this.props.onSelect(this.props.position);
+    }
+  },
+
   render: function() {
     var colorCode = this.getFillColorCode();
+    var renderClass = (this.props.isSelected)
+      ? 'checkersPieceSelected'
+      : 'checkersPiece';
     return (
-      <div className="checkersPiece">
+      <div className={renderClass} onClick={this.onSelect}>
         <svg>
           <circle
             cx="25"

@@ -26,6 +26,12 @@ ul.checkersGamesList {
   width: 50px;
 }
 
+.checkersPieceSelected {
+  background: #fff;
+  height: 50px;
+  width: 50px;
+}
+
 .checkersCell.odd {
   background: #bbb;
 }
