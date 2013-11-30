@@ -1,25 +1,6 @@
 /**
  * @jsx React.DOM
  */
-var CheckersPlayers = {
-  P1: 0,
-  P2: 1
-};
-
-var CheckersColors = {};
-CheckersColors[CheckersPlayers.P1] = {
-  fill: '#f00',
-  border: '#000'
-};
-CheckersColors[CheckersPlayers.P2] = {
-  fill: '#000',
-  border: '#fff'
-};
-
-var CheckersLevels = {
-  MAN: 0,
-  KING: 1
-};
 
 var CheckersApp = React.createClass({
 
@@ -182,8 +163,6 @@ var CheckersGamesList = React.createClass({
     );
   }
 });
-
-CheckersGames = new Meteor.Collection("checkers_games");
 
 var CheckersStage = React.createClass({
 
@@ -403,79 +382,10 @@ var CheckersPiece = React.createClass({
   }
 });
 
-if (Meteor.isClient) {
-  Meteor.startup(function() {
-    React.renderComponent(
-      <CheckersApp />,
-      document.getElementById('checkers_stage')
-    );
-  });
-}
-
-function getInitialBoardPieces() {
-  var playerOnePositions = [
-    [0, 0],
-    [0, 2],
-    [0, 4],
-    [0, 6],
-    [1, 1],
-    [1, 3],
-    [1, 5],
-    [1, 7],
-    [2, 0],
-    [2, 2],
-    [2, 4],
-    [2, 6]
-  ];
-  var playerTwoPositions = [
-    [5, 1],
-    [5, 3],
-    [5, 5],
-    [5, 7],
-    [6, 0],
-    [6, 2],
-    [6, 4],
-    [6, 6],
-    [7, 1],
-    [7, 3],
-    [7, 5],
-    [7, 7]
-  ];
-  var pieces = {};
-  function add(player, piece) {
-    var r = piece[0];
-    var c = piece[1];
-    var curRow = pieces[r] || (pieces[r] = {});
-    curRow[c] = {
-      player: player,
-      level: CheckersLevels.MAN
-    };
-  }
-  playerOnePositions.forEach(add.bind(null, CheckersPlayers.P1));
-  playerTwoPositions.forEach(add.bind(null, CheckersPlayers.P2));
-
-  return pieces;
-}
-
-Meteor.methods({
-  createGame: function(name) {
-    return CheckersGames.insert({
-      name: name,
-      pieces: getInitialBoardPieces()
-    });
-  },
-
-  deleteGame: function(gameID) {
-    return CheckersGames.remove({
-      _id: gameID
-    });
-  }
+Meteor.startup(function() {
+  React.renderComponent(
+    <CheckersApp />,
+    document.getElementById('checkers_stage')
+  );
 });
 
-if (Meteor.isServer) {
-  Meteor.startup(function() {
-    if (CheckersGames.find().count() === 0) {
-      Meteor.call('createGame', 'MyGame');
-    }
-  });
-}
