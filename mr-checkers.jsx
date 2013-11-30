@@ -100,10 +100,19 @@ var CheckersApp = React.createClass({
 
 var CheckersGamesList = React.createClass({
 
+  getInitialState: function() {
+    return {
+      newGameName: ''
+    };
+  },
+
   onCreateNewGame: function(evt) {
+    if (!this.state.newGameName.length) {
+      return;
+    }
     Meteor.call(
       'createGame',
-      'MyGame',
+      this.state.newGameName,
       function(error, newGameID) {
         if (error) {
           console.error('Failed to create game: ' + error.reason);
@@ -116,6 +125,16 @@ var CheckersGamesList = React.createClass({
 
   onSelectGame: function(evt) {
     this.props.onSelectGame(evt.target.value);
+  },
+
+  onDeleteGame: function(gameID, evt) {
+    Meteor.call('deleteGame', gameID);
+  },
+
+  onGameNameChange: function(evt) {
+    this.setState({
+      newGameName: evt.target.value
+    });
   },
 
   render: function() {
@@ -132,6 +151,11 @@ var CheckersGamesList = React.createClass({
             value={game._id}
           />
           {game.name}
+          <input
+            type="submit"
+            onClick={this.onDeleteGame.bind(this, game._id)}
+            value="X"
+          />
         </li>
       );
     }.bind(this));
@@ -143,9 +167,14 @@ var CheckersGamesList = React.createClass({
           {gameList}
           <li>
             <input
+              type="text"
+              onChange={this.onGameNameChange}
+              value={this.state.newGameName}
+            />
+            <input
               onClick={this.onCreateNewGame}
               type="submit"
-              value="Create New Game"
+              value="Create"
             />
           </li>
         </ul>
@@ -433,6 +462,12 @@ Meteor.methods({
     return CheckersGames.insert({
       name: name,
       pieces: getInitialBoardPieces()
+    });
+  },
+
+  deleteGame: function(gameID) {
+    return CheckersGames.remove({
+      _id: gameID
     });
   }
 });
